@@ -1,0 +1,16 @@
+{
+  "name": "assignmen",
+  "version": "1.0.0",
+"type":"module",
+  "main": "authour.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "mysql2": "^3.12.0"
+  }
+}
