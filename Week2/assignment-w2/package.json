@@ -1,0 +1,17 @@
+{
+  "name": "databases",
+  "version": "1.0.0",
+  "description": "> If you are following the HackYourFuture curriculum we recommend you to start with module > 1: [HTML/CSS/GIT](https://github.com/HackYourFuture/HTML-CSS). To get a complete overview of the HackYourFuture > curriculum first, click [here](https://github.com/HackYourFuture/curriculum).",
+  "main": "index.js",
+  "scripts": {
+    "ex-1": "node ex-1-keys.js",
+    "ex-2": "node ex-2-relationships.js",
+    "ex-3": "node ex-3-joins.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql2": "^3.12.0"
+  }
+}
