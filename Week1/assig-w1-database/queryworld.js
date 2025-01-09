@@ -1,215 +1,134 @@
 
-import mysql from 'mysql2';
+import mysql from 'mysql2/promise';
 
+(async () => {
+  try {
+  
+    const connection = await mysql.createConnection({
+      host: 'localhost',
+      user: 'hyfuser',
+      password: '12345',
+      database: 'world'
+    });
 
-const connection = mysql.createConnection({
-  host: 'localhost',       
-  user: 'hyfuser',         
-  password: '12345',     
-  database: 'world'        
-});
+    console.log('Connected to MySQL server.');
 
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to the MySQL server: ' + err.stack);
-    return;
-  }
-  console.log('Connected to MySQL server with id ' + connection.threadId);
-});
-
-
-const query = `
-  SELECT name
-  FROM country
-  WHERE population > 8000000;
-`;
-
-connection.query(query, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Countries with population greater than 8 million:');
-  console.log('============================================')
-  results.forEach((country) => {
-    console.log(country.name);
    
-  });
-   console.log('============================================')
-});
+    const queries = [
+      {
+        query: `
+          SELECT name
+          FROM country
+          WHERE population > 8000000;
+        `,
+        description: 'Countries with population greater than 8 million:',
+        display: (result) => result.name
+      },
+      {
+        query: `
+          SELECT name
+          FROM country
+          WHERE name LIKE '%land%';
+        `,
+        description: 'Countries with "land" in their names:',
+        display: (result) => result.name
+      },
+      {
+        query: `
+          SELECT name
+          FROM city
+          WHERE population BETWEEN 500000 AND 1000000;
+        `,
+        description: 'Cities with population between 500,000 and 1 million:',
+        display: (result) => result.name
+      },
+      {
+        query: `
+          SELECT name
+          FROM country
+          WHERE continent = 'Europe';
+        `,
+        description: 'Countries in Europe:',
+        display: (result) => result.name
+      },
+      {
+        query: `
+          SELECT name, SurfaceArea
+          FROM country
+          ORDER BY SurfaceArea DESC;
+        `,
+        description: 'Countries by Surface Area (Descending):',
+        display: (result) => `${result.name} - ${result.SurfaceArea} sq km`
+      },
+      {
+        query: `
+          SELECT name
+          FROM city
+          WHERE CountryCode = 'NLD';
+        `,
+        description: 'Cities in the Netherlands:',
+        display: (result) => result.name
+      },
+      {
+        query: `
+          SELECT population
+          FROM city
+          WHERE name = 'Rotterdam';
+        `,
+        description: 'Population of Rotterdam:',
+        display: (result) => `The population of Rotterdam is: ${result.population}`
+      },
+      {
+        query: `
+          SELECT name, SurfaceArea
+          FROM country
+          ORDER BY SurfaceArea DESC
+          LIMIT 10;
+        `,
+        description: 'Top 10 countries by surface area:',
+        display: (result, index) => `${index + 1}. ${result.name} - ${result.SurfaceArea} km²`
+      },
+      {
+        query: `
+          SELECT name, Population
+          FROM city
+          ORDER BY Population DESC
+          LIMIT 10;
+        `,
+        description: 'Top 10 most populated cities:',
+        display: (result, index) => `${index + 1}. ${result.name} - ${result.Population}`
+      },
+      {
+        query: `
+          SELECT SUM(Population) AS WorldPopulation
+          FROM country;
+        `,
+        description: 'Total population of the world:',
+        display: (result) => `World Population: ${result.WorldPopulation}`
+      }
+    ];
 
 
+    for (const { query, description, display } of queries) {
+      const [results] = await connection.query(query);
 
-const queryLand = `
-  SELECT name
-  FROM country
-  WHERE name LIKE '%land%';
-`;
+      console.log('============================================');
+      console.log(description);
+      console.log('============================================');
 
-connection.query(queryLand, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
+      if (Array.isArray(results)) {
+        results.forEach((result, index) => {
+          console.log(display(result, index));
+        });
+      } else {
+        console.log(display(results));
+      }
+
+    }
+
+    await connection.end();
+    console.log('Connection closed.');
+  } catch (error) {
+    console.error('Error:', error.message);
   }
-
-  console.log('Countries with "land" in their names:');
-  console.log('============================================')
-  results.forEach((land) => {
-    console.log(land.name);
-  });
-});
-
-const queryPopulation = `
-  SELECT name
-  FROM city
-  WHERE population BETWEEN 500000 AND 1000000;
-`;
-
-connection.query(queryPopulation, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Cities with population between 500,000 and 1 million:');
-  console.log('============================================')
-  results.forEach((city) => {
-    console.log(city.name);
-  });
- 
-});
-
-const queryEurope = `
-  SELECT name
-  FROM country
-  WHERE continent = 'Europe';
-`;
-
-connection.query(queryEurope, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Countries in Europe:');
-  console.log('============================================')
-  results.forEach((country) => {
-    console.log(country.name);
-  });
-});
-
-const querySurfaceArea = `
-  SELECT name, SurfaceArea
-  FROM country
-  ORDER BY SurfaceArea DESC;
-`;
-
-connection.query(querySurfaceArea, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Countries by Surface Area (Descending):');
-  console.log('============================================')
-  results.forEach((country) => {
-    console.log(`${country.name} - ${country.SurfaceArea} sq km`);
-  });
-});
-const queryNetherlands = `
-  SELECT name
-  FROM city
-  WHERE CountryCode = 'NLD';
-`;
-
-connection.query(queryNetherlands, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Cities in the Netherlands:');
-  console.log('============================================')
-  results.forEach((city) => {
-    console.log(city.name);
-  });
-});
-const queryRotterdam = `
-  SELECT population
-  FROM city
-  WHERE name = 'Rotterdam';
-`;
-
-connection.query(queryRotterdam, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-
-  if (results.length > 0) {
-    console.log('============================================')
-    console.log(`The population of Rotterdam is: ${results[0].population}`);
-    console.log('============================================')
-  } else {
-    console.log('City not found.');
-  }
-});
-const queryTop10 = `
-  SELECT name, SurfaceArea
-  FROM country
-  ORDER BY SurfaceArea DESC
-  LIMIT 10;
-`;
-
-connection.query(queryTop10, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Top 10 countries by surface area:');
-  console.log('============================================')
-  results.forEach((country, index) => {
-    console.log(`${index + 1}. ${country.name} - ${country.SurfaceArea} km²`);
-  });
-});
-
-const queryTopPopulatedCity = `
-  SELECT Name, Population
-  FROM city
-  ORDER BY Population DESC
-  LIMIT 10;
-`;
-
-connection.query(queryTopPopulatedCity, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Top 10 most populated cities:');
-  console.log('============================================')
-  results.forEach((city, index) => {
-    console.log(`${index + 1}. ${city.Name} - ${city.Population}`);
-  });
-});
-
-const queryWorldPopulation = `
-  SELECT SUM(Population) AS WorldPopulation
-  FROM country;
-`;
-
-connection.query(queryWorldPopulation, (error, results) => {
-  if (error) {
-    console.error('Error querying the database: ' + error.stack);
-    return;
-  }
-  console.log('============================================')
-  console.log('Total population of the world: ' + results[0].WorldPopulation);
-  console.log('============================================')
-});
-
-
-connection.end();
+})();
