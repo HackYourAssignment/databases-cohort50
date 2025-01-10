@@ -47,7 +47,13 @@ const insertValues = async () => {
     console.log('Meeting values inserted successfully.');
   } catch (err) {
     console.error('Error inserting values:', err);
+  }  finally {
+    try {
+      await db.end();
+      console.log('Database connection closed.');
+    } catch (closeErr) {
+      console.error('Error closing the database connection:', closeErr);
+    }
   }
-};
-
-insertValues();
+}
+  insertValues();

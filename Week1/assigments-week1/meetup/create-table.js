@@ -36,11 +36,16 @@ async function createTables() {
     `;
     await db.query(CREATE_MEETING_TABLE);  
     console.log('Table "Meeting" created successfully.');
-
-    console.log("Connection closed.");
   } catch (err) {
     console.error("Error:", err);
+  } finally {
+    try {
+      await db.end();
+      console.log("Connection closed.");
+    } catch (closeErr) {
+      console.error("Error closing the database connection:", closeErr);
+    }
   }
-}
+};
 
 createTables();
