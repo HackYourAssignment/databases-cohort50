@@ -15,7 +15,7 @@ const createDatabaseAndTables = async () => {
         university VARCHAR(255) NOT NULL,
         date_of_birth DATE NOT NULL,
         h_index INT,
-        gender VARCHAR(50)
+       gender ENUM('Male', 'Female', 'Other') NOT NULL
       );
     `);
     console.log('Authors table created successfully.');

@@ -7,7 +7,7 @@ const executeQueries = async () => {
       SELECT p.paper_title, COUNT(ap.author_id) AS author_count
       FROM research_papers p
       LEFT JOIN author_paper ap ON p.paper_id = ap.paper_id
-      GROUP BY p.paper_id, p.paper_title;
+      GROUP BY p.paper_id;
     `);
     if (papersAndAuthorCount.length === 0) {
       console.log('No research papers found.');
@@ -17,14 +17,10 @@ const executeQueries = async () => {
 
     // Sum of research papers published by female authors
     const [papersByFemaleAuthors] = await db.query(`
-      SELECT SUM(author_papers_count) AS total_papers
-      FROM (
-          SELECT COUNT(ap.paper_id) AS author_papers_count
-          FROM authors a
-          JOIN author_paper ap ON a.author_id = ap.author_id
-          WHERE a.gender = 'Female'
-          GROUP BY a.author_id
-      ) AS subquery;
+       SELECT COUNT(DISTINCT ap.paper_id) AS total_papers  
+       FROM authors a
+       JOIN author_paper ap ON a.author_id = ap.author_id  -- Join authors and author_paper to find relationships
+       WHERE a.gender = 'Female';  
     `);
     if (papersByFemaleAuthors[0].total_papers === null) {
       console.log('No papers found for female authors.');
@@ -46,10 +42,10 @@ const executeQueries = async () => {
 
     // Sum of research papers by authors per university
     const [papersByUniversity] = await db.query(`
-      SELECT a.university, COUNT(ap.paper_id) AS total_papers
+      SELECT a.university, COUNT(DISTINCT ap.paper_id) AS total_papers
       FROM authors a
       LEFT JOIN author_paper ap ON a.author_id = ap.author_id
-      GROUP BY a.university;
+     GROUP BY a.university;
     `);
     if (papersByUniversity.length === 0) {
       console.log('No research papers found for authors by university.');
