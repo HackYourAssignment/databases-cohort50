@@ -61,14 +61,17 @@ try {
     // Query 5
     const minMaxHIndex = `
         SELECT university, MIN(h_index) AS min_h_index, MAX(h_index) AS max_h_index
-        FROM authors
+        FROM (
+            SELECT DISTINCT university, h_index
+            FROM authors
+        ) AS unique_authors
         GROUP BY university;
     `;
     await executeQuery(minMaxHIndex, "Min and max h-index per university:");
 
 } catch (err) {
     console.error('Error:', err);
-    
+
 } finally {
     if (connection) {
         await connection.end();
