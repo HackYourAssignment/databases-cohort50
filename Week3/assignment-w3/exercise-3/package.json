@@ -1,0 +1,16 @@
+{
+    "name": "exercise-3",
+    "version": "1.0.0",
+    "main": "exercise-3.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "type": "module",
+    "dependencies": {
+        "mysql2": "^3.12.0"
+    }
+}
