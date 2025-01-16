@@ -1,59 +1,56 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
-import dotenv from "dotenv";
-
-dotenv.config();
-
+const { MongoClient, ServerApiVersion } = require("mongodb");
+require('dotenv').config();
 
 const { seedDatabase } = require("./seedDatabase.js");
 
 async function createEpisodeExercise(client) {
 
 
-    const newEpisode = {
-      episode: "S09E13",
-      title: "MOUNTAIN HIDE-AWAY",
-      elements: [
-        "CIRRUS", "CLOUDS", "CONIFER", "DECIDIOUS", "GRASS",
-        "MOUNTAIN", "MOUNTAINS", "RIVER", "SNOWY_MOUNTAIN", "TREE", "TREES"
-      ]
-    };
-  
-     await client.db("databaseWeek3").collection("bob_ross_episodes").insertOne(newEpisode);
-  
-    console.log(
-   `Created season 9 episode 13 and the document got the id ${"TODO: fill in variable here"}`
-    );
+  const newEpisode = {
+    EPISODE: "S09E13",
+    title: "MOUNTAIN HIDE-AWAY",
+    elements: [
+      "CIRRUS", "CLOUDS", "CONIFER", "DECIDIOUS", "GRASS",
+      "MOUNTAIN", "MOUNTAINS", "RIVER", "SNOWY_MOUNTAIN", "TREE", "TREES"
+    ]
+  };
+
+  const result = await client.db("databaseweek3").collection("bob_ross_episodes").insertOne(newEpisode);
+
+
+  console.log(
+    `Created season 9 episode 13 and the document got the id ${result.insertedId}`
+  );
+
+  }
+async function findEpisodesExercises(client) {
+  const episode2Title = await client
+  .db("databaseweek3")
+  .collection("bob_ross_episodes")
+  .findOne({  episode: "S02E02" });
+  if (!episode2Title) {
+    console.log("No documents found in the collection.");
+  } else {
+    console.log(`The title of episode 2 in season 2 is ${episode2Title.title}`);
   }
   
 
-
-
-
-async function findEpisodesExercises(client) {
-
-
-
-  const episode2Title = await client
-  .db("databaseWeek3")
-  .collection("bob_ross_episodes")
-  .findOne({ episode: "S02E02" });
-
-console.log(`The title of episode 2 in season 2 is ${episode2Title.title}`);
-
-
  
-  const blackRiverEpisode = await client
-  .db("databaseWeek3")
+const blackRiverEpisode = await client
+  .db("databaseweek3")
   .collection("bob_ross_episodes")
-  .findOne({ title: "BLACK RIVER" });
+  .findOne({ title: "BLACK RIVER" }); 
 
-console.log(
-  `The season and episode number of the "BLACK RIVER" episode is ${blackRiverEpisode.episode}`
-);
-
+if (!blackRiverEpisode) {
+  console.log("The 'BLACK RIVER' episode was not found in the collection.");
+} else {
+  console.log(
+    `The season and episode number of the "BLACK RIVER" episode is ${blackRiverEpisode.episode}`
+  );
+}
 
   const cliffEpisodes = await client
-  .db("databaseWeek3")
+  .db("databaseweek3")
   .collection("bob_ross_episodes")
   .find({ elements: "CLIFF" })
   .toArray();
@@ -66,22 +63,26 @@ console.log(
 
 
   const cliffAndLighthouseEpisodes = await client
-  .db("databaseWeek3")
+  .db("databaseweek3")
   .collection("bob_ross_episodes")
   .find({ elements: { $all: ["CLIFF", "LIGHTHOUSE"] } })
   .toArray();
-
-console.log(
-  `The episodes that Bob Ross painted a CLIFF and a LIGHTHOUSE are ${cliffAndLighthouseEpisodes
-    .map((ep) => ep.title)
-    .join(", ")}`
-);
+  if (cliffAndLighthouseEpisodes.length === 0) {
+    console.log("No episodes found where Bob Ross painted both a CLIFF and a LIGHTHOUSE.");
+  } else {
+    console.log(
+      `The episodes that Bob Ross painted a CLIFF and a LIGHTHOUSE are: ${cliffAndLighthouseEpisodes
+        .map((ep) => ep.title)
+        .join(", ")}`
+    );
+  }
 }
+
 
 async function updateEpisodeExercises(client) {
 
   const result1 = await client
-  .db("databaseWeek3")
+  .db("databaseweek3")
   .collection("bob_ross_episodes")
   .updateOne(
     { episode: "S30E13" },
@@ -93,7 +94,7 @@ console.log(
 );
 
   const result2 = await client
-  .db("databaseWeek3")
+  .db("databaseweek3")
   .collection("bob_ross_episodes")
   .updateMany(
     { elements: "BUSHES" },
@@ -108,7 +109,7 @@ console.log(
 
 async function deleteEpisodeExercise(client) {
   const result = await client
-  .db("databaseWeek3")
+  .db("databaseweek3")
   .collection("bob_ross_episodes")
   .deleteOne({ episode: "S31E14" });
 
@@ -125,32 +126,29 @@ async function main() {
     );
   }
   const client = new MongoClient(process.env.MONGODB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+   
     serverApi: ServerApiVersion.v1,
   });
 
   try {
     await client.connect();
+console.log('connected to the database ')
 
-    // Seed our database
     await seedDatabase(client);
 
-    // CREATE
     await createEpisodeExercise(client);
 
-    // READ
+  
     await findEpisodesExercises(client);
 
-    // UPDATE
+
     await updateEpisodeExercises(client);
 
-    // DELETE
+
     await deleteEpisodeExercise(client);
   } catch (err) {
     console.error(err);
   } finally {
-    // Always close the connection at the end
     client.close();
   }
 }
