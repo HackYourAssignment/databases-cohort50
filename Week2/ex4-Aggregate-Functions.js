@@ -51,7 +51,7 @@ try {
 
     // Query 4
     const totalPapersPerUniversity = `
-        SELECT authors.university, COUNT(author_paper.paper_id) AS total_papers
+        SELECT authors.university, COUNT(DISTINCT author_paper.paper_id) AS total_papers
         FROM authors
         LEFT JOIN author_paper ON authors.author_id = author_paper.author_id
         GROUP BY authors.university;
@@ -61,10 +61,7 @@ try {
     // Query 5
     const minMaxHIndex = `
         SELECT university, MIN(h_index) AS min_h_index, MAX(h_index) AS max_h_index
-        FROM (
-            SELECT DISTINCT university, h_index
-            FROM authors
-        ) AS unique_authors
+        FROM authors
         GROUP BY university;
     `;
     await executeQuery(minMaxHIndex, "Min and max h-index per university:");
