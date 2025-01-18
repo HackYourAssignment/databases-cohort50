@@ -1,76 +1,42 @@
 
-
-import mysql from 'mysql2/promise'; 
-
-
+import mysql from 'mysql2/promise';
+// here i could not remove export .. 
+// how could i import connection to the other files 
+// but i changed the connection into separate function 
+// then i export it 
 export const connection = await mysql.createConnection({
   host: 'localhost',
   user: 'hyfuser',
   password: '12345',
-  database: 'library'
+  database: 'library',
 });
 
-
-const createAuthorsTable = async () => {
-  const authorsTable = `
-    CREATE TABLE IF NOT EXISTS authors (
-      author_id int PRIMARY KEY AUTO_INCREMENT,
-      author_name varchar(50) NOT NULL,
-      university VARCHAR(40),
-      dat_of_birth DATE,
-      h_index INT,
-      gender VARCHAR(10)
-    );
-  `;
-
+const runDatabaseSetup = async () => {
   try {
+    // here I solved the problem that i asked about last week 
+    // by make the table truncate .. in this case i can run 
+    // the file multiple times without changing the values of ids . 
+    await connection.execute('SET FOREIGN_KEY_CHECKS = 0;');
+    await connection.execute('TRUNCATE TABLE authors;');
+    await connection.execute('SET FOREIGN_KEY_CHECKS = 1;');
+    console.log('Authors table truncated.');
+
+    const authorsTable = `
+      CREATE TABLE IF NOT EXISTS authors (
+        author_id INT PRIMARY KEY AUTO_INCREMENT,
+        author_name VARCHAR(50) NOT NULL,
+        university VARCHAR(40),
+        date_of_birth DATE,
+        h_index INT,
+        gender VARCHAR(10),
+        mentor INT,
+        CONSTRAINT fk_mentor FOREIGN KEY (mentor) REFERENCES authors(author_id)
+      );
+    `;
     await connection.execute(authorsTable);
-    console.log('Table created successfully');
-  } catch (err) {
-    console.error('Error creating the table:', err.message);
-  }
-};
+    console.log('Table created successfully.');
 
-
-const checkColumnExists = async () => {
-  const checkColumnQuery = `
-    SELECT COUNT(*) AS count
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = 'authors'
-    AND COLUMN_NAME = 'mentor';
-  `;
-
-  try {
-    const [results] = await connection.execute(checkColumnQuery);
-    if (results[0].count === 0) {
-      await addMentorColumn();
-    } else {
-      console.log('Mentor column already exists.');
-    }
-  } catch (err) {
-    console.error('Error checking column existence:', err.message);
-  }
-};
-
-
-const addMentorColumn = async () => {
-  const addMentorColumnQuery = `
-    ALTER TABLE authors
-    ADD COLUMN mentor INT,
-    ADD CONSTRAINT fk_mentor FOREIGN KEY (mentor) REFERENCES authors(author_id);
-  `;
-
-  try {
-    await connection.execute(addMentorColumnQuery);
-    console.log('Mentor column added successfully');
-  } catch (err) {
-    console.error('Error adding mentor column:', err.message);
-  }
-};
-
-
-const insertAuthorsData = async () => {
-    const authorsData = [
+     const authorsData = [
       ['John Doe', 'Harvard', '1980-01-15', 25, 'Male', 2],
       ['Jane Smith', 'MIT', '1975-05-20', 30, 'Female', 3],
       ['Michael Johnson', 'Stanford', '1990-03-10', 20, 'Male', 1],
@@ -85,29 +51,20 @@ const insertAuthorsData = async () => {
       ['Emma Garcia', 'USC', '1984-10-14', 26, 'Female', 1],
       ['Liam Harris', 'Chicago', '1989-02-27', 23, 'Male', 2],
       ['Isabella Moore', 'Cornell', '1993-01-09', 21, 'Female', 3],
-      ['Ethan Martinez', 'Duke', '1982-07-04', 34, 'Male', 3]
+      ['Ethan Martinez', 'Duke', '1982-07-04', 34, 'Male', 3],
     ];
-  
+
     const insertQuery = `
-      INSERT INTO authors (author_name, university, dat_of_birth, h_index, gender, mentor)
+      INSERT INTO authors (author_name, university, date_of_birth, h_index, gender, mentor)
       VALUES ?;
     `;
-  
-    try {
-    
-      const [results] = await connection.execute(insertQuery, [authorsData]);
-      console.log('Inserted rows into authors table:', results);
-    } catch (err) {
-      console.error('Error inserting data into authors table:', err.message);
-    }
-  };
-  
 
-  const runDatabaseSetup = async () => {
-    await createAuthorsTable();  
-    await checkColumnExists();   
-    await insertAuthorsData();   
-  };
-  
-  runDatabaseSetup();
-  
+    await connection.query(insertQuery, [authorsData]);
+
+    console.log('Data inserted successfully into the authors table.');
+  } catch (err) {
+    console.error('Error during database setup:', err.message);
+  } 
+};
+
+await runDatabaseSetup();

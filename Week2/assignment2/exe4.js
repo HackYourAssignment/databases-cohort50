@@ -1,7 +1,4 @@
-
-
 import { connection } from './exe1.js';
-
 
 const authorsPerPaper = `
   SELECT 
@@ -17,7 +14,7 @@ const authorsPerPaper = `
 
 const femaleAuthorsPapers = `
   SELECT 
-    COUNT(author_papers.paper_id) AS TotalPapers
+    COUNT(DISTINCT author_papers.paper_id) AS TotalPapers
   FROM 
     authors
   JOIN 
@@ -39,7 +36,7 @@ const averageHIndex = `
 const papersPerUniversity = `
   SELECT 
     authors.university, 
-    COUNT(author_papers.paper_id) AS TotalPapers
+    COUNT( DISTINCT author_papers.paper_id) AS TotalPapers
   FROM 
     authors
   LEFT JOIN 
@@ -74,4 +71,4 @@ const executeQueries = async () => {
 };
 
 
-executeQueries();
+await executeQueries();
