@@ -8,13 +8,13 @@ const data = require("./data.json");
  */
 const seedDatabase = async (client) => {
   const hasCollection = await client
-    .db("databaseWeek3")
+    .db("databaseweek3")
     .listCollections({ name: "bob_ross_episodes" })
     .hasNext();
 
   if (hasCollection) {
     const bobRossCollection = await client
-      .db("databaseWeek3")
+      .db("databaseweek3")
       .collection("bob_ross_episodes");
 
     // Remove all the documents
