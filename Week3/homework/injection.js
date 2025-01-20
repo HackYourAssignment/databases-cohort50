@@ -1,5 +1,4 @@
 
-
   function getPopulation(Country, name, code, cb) {
     conn.query(
       `SELECT Population FROM ${Country} WHERE Name = '${name}' AND code = '${code}'`,
@@ -11,11 +10,9 @@
     );
   }
   
-
   getPopulation("Country", `' OR 1=1 --`, `ignored`, console.log);
   
 // ==========================================================================
-
 
   function getPopulation(conn, countryTable, name, code, cb) {
     

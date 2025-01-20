@@ -1,13 +1,8 @@
 import {createConnection}  from './transactions-create-tables.js';
-
-
  export async function insertSampleData() {
   const connection = await createConnection(); 
-
   try {
     console.log('Inserting sample data...');
-
-   
     const accounts = [
       { balance: 1000.00 },
       { balance: 2000.50 },
@@ -23,8 +18,7 @@ import {createConnection}  from './transactions-create-tables.js';
 
     console.log('Sample data inserted into `account` table.');
 
-   
-    const accountChanges = [
+   const accountChanges = [
       { account_number: 1, amount: 100.00, remark: 'Deposit' },
       { account_number: 1, amount: -50.00, remark: 'Withdrawal' },
       { account_number: 2, amount: 200.00, remark: 'Deposit' },

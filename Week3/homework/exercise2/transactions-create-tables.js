@@ -1,7 +1,6 @@
 
 import mysql from 'mysql2/promise';
 
-
 export async function createConnection() {
   const connection = await mysql.createConnection({
     host: 'localhost',
@@ -12,10 +11,8 @@ export async function createConnection() {
   console.log('Connected to MySQL database.');
   return connection;
 }
-
 export async function createTables() {
   const connection = await createConnection();
-
   try {
     console.log('Creating tables...');
 
