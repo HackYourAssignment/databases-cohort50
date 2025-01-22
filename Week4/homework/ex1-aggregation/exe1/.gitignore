@@ -1,0 +1,4 @@
+.env
+node_modules
+population_pyramid_1950-2022.csv
+studentJson.json 

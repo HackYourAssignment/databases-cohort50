@@ -1,0 +1,18 @@
+{
+  "name": "assignment4",
+  "version": "1.0.0",
+  "main": "connection.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "csvtojson": "^2.0.10",
+    "dotenv": "^16.4.7",
+    "fs": "^0.0.1-security",
+    "mongodb": "^6.12.0"
+  }
+}
