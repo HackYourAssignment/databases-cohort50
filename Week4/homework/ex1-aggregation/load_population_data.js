@@ -14,6 +14,13 @@ async function loadCSVToMongoDB() {
         const db = client.db("population_data");
         const collection = db.collection("population");
 
+        const existingDataCount = await collection.countDocuments();
+        if (existingDataCount > 0) {
+            console.log("Data already exists in the collection. Skipping insertion.");
+            await client.close();
+            return;
+        }
+        
         const data = [];
         const csvFilePath = "./population_pyramid_1950-2022.csv";
 
