@@ -1,0 +1,20 @@
+[
+    {
+        "account_number": 101,
+        "balance": 6660,
+        "account_changes": [],
+        "change_counter": 0
+    },
+    {
+        "account_number": 102,
+        "balance": 4040,
+        "account_changes": [],
+        "change_counter": 0
+    },
+    {
+        "account_number": 103,
+        "balance": 8055,
+        "account_changes": [],
+        "change_counter": 0
+    }
+]
