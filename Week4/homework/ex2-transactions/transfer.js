@@ -15,8 +15,15 @@ async function transfer(fromAccount, toAccount, amount, remark) {
         const session = client.startSession();
 
         await session.withTransaction(async () => {
-            const fromAccountDoc = await accountsCollection.findOne({ account_number: fromAccount });
-            const toAccountDoc = await accountsCollection.findOne({ account_number: toAccount });
+            const fromAccountDoc = await accountsCollection.findOne(
+                { account_number: fromAccount },
+                { session }
+            );
+
+            const toAccountDoc = await accountsCollection.findOne(
+                { account_number: toAccount },
+                { session }
+            );
 
             if (!fromAccountDoc || !toAccountDoc) {
                 throw new Error("One or both accounts not found!");
@@ -26,39 +33,44 @@ async function transfer(fromAccount, toAccount, amount, remark) {
                 throw new Error("Insufficient funds in the source account!");
             }
 
-            const fromChangeNumber = fromAccountDoc.account_changes.length + 1;
+            const fromChangeNumber = fromAccountDoc.change_counter + 1;
+            const toChangeNumber = toAccountDoc.change_counter + 1;
+
             await accountsCollection.updateOne(
                 { account_number: fromAccount },
                 {
-                    $inc: { balance: -amount },
+                    $inc: { balance: -amount, change_counter: 1 },
                     $push: {
                         account_changes: {
                             change_number: fromChangeNumber,
                             amount: -amount,
                             changed_date: new Date(),
-                            remark
-                        }
-                    }
-                }
+                            remark,
+                        },
+                    },
+                },
+                { session }
             );
 
-            const toChangeNumber = toAccountDoc.account_changes.length + 1;
             await accountsCollection.updateOne(
                 { account_number: toAccount },
                 {
-                    $inc: { balance: amount },
+                    $inc: { balance: amount, change_counter: 1 },
                     $push: {
                         account_changes: {
                             change_number: toChangeNumber,
                             amount,
                             changed_date: new Date(),
-                            remark
-                        }
-                    }
-                }
+                            remark,
+                        },
+                    },
+                },
+                { session }
             );
 
-            console.log(`Transferred ${amount} from account ${fromAccount} to account ${toAccount}`);
+            console.log(
+                `Transferred ${amount} from account ${fromAccount} to account ${toAccount}`
+            );
         });
 
         console.log("Transaction completed!");
@@ -72,5 +84,5 @@ async function transfer(fromAccount, toAccount, amount, remark) {
 module.exports = transfer;
 
 if (require.main === module) {
-    transfer(101, 102, 1000, "Payment for services");
+    transfer(101, 102, 1500, "Payment for services");
 }
