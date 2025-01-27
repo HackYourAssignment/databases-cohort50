@@ -1,0 +1,20 @@
+Example of a value that can be passed as `name` and `code` that would take advantage of SQL injection:
+
+name: 'USA' OR '1' = '1' --
+code: 'USA'
+
+This would result in the following SQL query:
+
+SELECT Population FROM world WHERE Name = 'USA' OR '1' = '1' --' AND code = 'USA';
+
+The condition '1' = '1' always evaluates to TRUE, causing the query to return all records in the world table.
+
+The -- starts a comment, so everything after it is ignored, bypassing the code = 'USA' condition.
+
+2. How to prevent SQL injections?
+
+We can prevent injections by using **parameterized queries** (also known as **prepared statements**).
+
+Why parameterized queries work:
+- They treat user inputs as data, not executable SQL code.
+- The database engine safely escapes special characters and ensures user input can't alter the query structure.

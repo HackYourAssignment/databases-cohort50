@@ -1,0 +1,33 @@
+[
+    {
+      "title": "Mountain Retreat",
+      "season": 1,
+      "episode": 1,
+      "elements": ["mountain", "trees", "cabin", "sky", "clouds"]
+    },
+    {
+      "title": "Quiet Stream",
+      "season": 1,
+      "episode": 2,
+      "elements": ["stream", "trees", "grass", "sky"]
+    },
+    {
+      "title": "Winter Wonderland",
+      "season": 1,
+      "episode": 3,
+      "elements": ["snow", "mountain", "trees", "sky"]
+    },
+    {
+      "title": "Forest Lake",
+      "season": 1,
+      "episode": 4,
+      "elements": ["lake", "forest", "sky", "clouds", "bushes"]
+    },
+    {
+      "title": "Golden Sunset",
+      "season": 1,
+      "episode": 5,
+      "elements": ["sunset", "trees", "clouds", "river"]
+    }
+  ]
+  
