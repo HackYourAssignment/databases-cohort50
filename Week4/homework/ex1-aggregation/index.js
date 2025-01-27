@@ -50,19 +50,32 @@ async function getPopulationByCountry(country) {
   }
 }
 
-// Function to get population by year and age with total population field
-async function getPopulationByYearAndAge(year, age) {
+// Function to get population by continent, year and age with total population field
+async function getContinentPopulation(year, age) {
   const db = await connectToDB();
   const collection = db.collection(collectionName);
 
   try {
     const result = await collection.aggregate([
-      { $match: { Year: year, Age: age } },
+      { 
+        $match: { 
+          Year: year, 
+          Age: age, 
+          $or: [
+            { Country: 'AFRICA' },
+            { Country: 'ASIA' },
+            { Country: 'EUROPE' },
+            { Country: 'LATIN AMERICA AND THE CARIBBEAN' },
+            { Country: 'NORTHERN AMERICA' },
+            { Country: 'OCEANIA' }
+          ]
+        }
+      },
       {
         $addFields: {
-          TotalPopulation: { $add: ['$M', '$F'] },
-        },
-      },
+          TotalPopulation: { $add: ["$M", "$F"] }
+        }
+      }
     ]).toArray();
 
     console.log(result);
@@ -77,7 +90,7 @@ async function getPopulationByYearAndAge(year, age) {
   try {
     await importCSVToMongoDB();
     await getPopulationByCountry('Netherlands');
-    await getPopulationByYearAndAge(2020, '100+');
+    await getContinentPopulation( 2020, '100+');
   } catch (error) {
     console.error('Unexpected error:', error);
   } finally {

@@ -71,12 +71,7 @@ async function setupDatabase() {
     console.log('Database setup completed.');
   } catch (error) {
     console.error('Error setting up database:', error);
-  } finally {
-    if (client) {
-      await client.close();
-      console.log('Database connection closed');
-    }
-  }
+  } 
 }
 
 initialize();
