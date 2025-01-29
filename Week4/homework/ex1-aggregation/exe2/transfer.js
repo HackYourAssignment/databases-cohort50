@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-import { MongoClient } from 'mongodb';
+import dotenv from "dotenv";
+import { MongoClient } from "mongodb";
 dotenv.config();
 
 const uri = process.env.uri;
@@ -12,61 +12,80 @@ const transferMoney = async (fromAccount, toAccount, amount, remark) => {
     const database = client.db("bankaccount");
     const collection = database.collection("account");
 
-    const sender = await collection.findOne({ account_number: fromAccount });
-    const recipient = await collection.findOne({ account_number: toAccount });
-
-    if (!sender || !recipient) {
-      throw new Error("Invalid account number(s)");
-    }
-
-    if (sender.balance < amount) {
-      throw new Error("Insufficient balance in the sender's account");
-    }
-
-    const newSenderChange = {
-      change_number: sender.account_changes.length + 1,
-      amount: -amount,
-      changed_date: new Date(),
-      remark,
-    };
-
-    const newRecipientChange = {
-      change_number: recipient.account_changes.length + 1,
-      amount,
-      changed_date: new Date(),
-      remark,
-    };
-
     const session = client.startSession();
     session.startTransaction();
-    try {
-      await collection.updateOne(
-        { account_number: fromAccount },
-        {
-          $inc: { balance: -amount },
-          $push: { account_changes: newSenderChange },
-        },
-        { session }
-      );
 
-      await collection.updateOne(
-        { account_number: toAccount },
-        {
-          $inc: { balance: amount },
-          $push: { account_changes: newRecipientChange },
-        },
-        { session }
-      );
+    try {
+      const [sender, recipient] = await Promise.all([
+        collection.findOne({ account_number: fromAccount }, { session }),
+        collection.findOne({ account_number: toAccount }, { session }),
+      ]);
+
+      if (!sender || !recipient) {
+        throw new Error("Invalid account number(s)");
+      }
+
+      if (sender.balance < amount) {
+        throw new Error("Insufficient balance in the sender's account");
+      }
+
+      const senderNextChangeNumber =
+        (Number(sender.next_change_number) || 0) + 1;
+      const recipientNextChangeNumber =
+        (Number(recipient.next_change_number) || 0) + 1;
+
+      const senderNewBalance = Number(sender.balance) - amount;
+      const recipientNewBalance = Number(recipient.balance) + amount;
+
+      await Promise.all([
+        collection.findOneAndUpdate(
+          { account_number: fromAccount },
+          {
+            $set: {
+              balance: senderNewBalance,
+              next_change_number: senderNextChangeNumber,
+            },
+            $push: {
+              account_changes: {
+                change_number: senderNextChangeNumber,
+                amount: -amount,
+                changed_date: new Date(),
+                remark,
+              },
+            },
+          },
+          { session, returnDocument: "after" }
+        ),
+        collection.findOneAndUpdate(
+          { account_number: toAccount },
+          {
+            $set: {
+              balance: recipientNewBalance,
+              next_change_number: recipientNextChangeNumber,
+            },
+            $push: {
+              account_changes: {
+                change_number: recipientNextChangeNumber,
+                amount,
+                changed_date: new Date(),
+                remark,
+              },
+            },
+          },
+          { session }
+        ),
+      ]);
 
       await session.commitTransaction();
-      console.log(`Transferred $${amount} from account ${fromAccount} to ${toAccount}`);
+      console.log(
+        `Transferred $${amount} from account ${fromAccount} to ${toAccount}`
+      );
     } catch (error) {
       await session.abortTransaction();
       throw error;
     } finally {
       session.endSession();
     }
-
   } catch (error) {
     console.error("Error transferring money:", error);
   } finally {
